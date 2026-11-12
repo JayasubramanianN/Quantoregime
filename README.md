@@ -25,9 +25,9 @@ The platform provides quantitative portfolio managers, risk committees, and macr
 graph TD
     subgraph DataIngestion ["1. Data Ingestion & Alignment Engine"]
         FRED["FRED API Gateway<br/>(FEDFUNDS, DGS10, DGS2, CPI, UNRATE, Spreads)"]
-        YF["Yahoo Finance Gateway<br/>(S&P 500 ^GSPC, Russell 2000 ^RUT, Gold GC=F, Oil CL=F)"]
+        YF["Yahoo Finance Gateway<br/>(S&P 500, Russell 2000, Gold, Oil)"]
         EDGAR["SEC EDGAR & Central Bank Corpus<br/>(FOMC Minutes, ECB Speeches, Form 10-K Risk Factors)"]
-        ALIGN["Temporal Resampling & Alignment<br/>(Daily 'B' Frequency, Forward-fill & Validation)"]
+        ALIGN["Temporal Resampling & Alignment<br/>(Daily B Frequency, Forward-fill & Validation)"]
     end
 
     subgraph CoreAnalytics ["2. Core Quantitative Analytics Engines"]
@@ -75,38 +75,38 @@ The diagram below outlines the sequential workflow executed from raw macroeconom
 ```mermaid
 sequenceDiagram
     autonumber
-    actor PM as Portfolio Manager / Analyst
-    participant Data as Data Ingestion (FRED / YF)
+    actor PM as Portfolio Manager
+    participant Data as Data Ingestion Engine
     participant NLP as Qualitative NLP & RAG
-    participant Econ as Econometric Hypothesis Lab
-    participant ML as Multi-Horizon Forecaster
-    participant Risk as Stochastic Monte Carlo Engine
-    participant Export as PDF Tearsheet Generator
+    participant Econ as Econometric Lab
+    participant ML as ML Forecaster
+    participant Risk as Stochastic Risk Engine
+    participant Export as PDF Tearsheet Engine
 
-    PM->>Data: Request Macro & Asset Feed (S&P 500, FEDFUNDS, 10Y-2Y)
-    Data-->>Data: Align business daily timestamps, ffill missing ticks
+    PM->>Data: Request Macro and Asset Feeds (S&P 500, FEDFUNDS, 10Y-2Y)
+    Data-->>Data: Align business daily timestamps and forward-fill
     Data->>Econ: Deliver aligned time-series dataframe
     
-    PM->>NLP: Query Central Bank Speech Corpus & SEC Filings
+    PM->>NLP: Query Central Bank Speech Corpus and SEC Filings
     NLP-->>NLP: Cosine semantic search via FAISS 384d vectors
-    NLP-->>PM: Hawkish Score (+0.18), Policy Stance: Data-Dependent Neutral
+    NLP-->>PM: Hawkish Score +0.18, Stance: Data-Dependent Neutral
     
-    PM->>Econ: Run ADF Unit Root & Granger Causality
-    Econ-->>Econ: ADF raw levels non-stationary (p=0.23); Diff d=1 stationary (p=0.0001)
+    PM->>Econ: Run ADF Unit Root and Granger Causality
+    Econ-->>Econ: ADF raw levels non-stationary (p=0.23), Diff d=1 stationary (p=0.0001)
     Econ-->>Econ: Granger test: Fed Funds leads Yield Spread at Lag 2 (F=4.12, p=0.018)
-    Econ-->>PM: Statistically significant causality confirmed (p < 0.05)
+    Econ-->>PM: Statistically significant causality confirmed (p under 0.05)
     
     PM->>ML: Train Prophet (Trend) + XGBoost (Lags) Ensemble
-    ML-->>ML: Blend 40% Prophet + 60% XGBoost, evaluate in-sample MAE/RMSE
-    ML-->>PM: Forward Projections: 21d, 63d, 126d, 252d (+15.46% 1-Year Target)
+    ML-->>ML: Blend 40% Prophet + 60% XGBoost, evaluate MAE and RMSE
+    ML-->>PM: Forward Projections: 21d, 63d, 126d, 252d (+15.46% 1Y Target)
     
-    PM->>Risk: Execute 10,000-Path GBM Simulation & 5-Regime Stress Matrix
+    PM->>Risk: Execute 10,000-Path GBM Simulation and Stress Matrix
     Risk-->>Risk: Compute empirical VaR 95% (-$1,102.66) and CVaR 95% (-$1,345.20)
-    Risk-->>Risk: Evaluate Hawkish (+150 bps), Stagflation, Liquidity Squeeze scenarios
-    Risk-->>PM: Interactive Percentile Cone & Stress Risk/Return Matrix
+    Risk-->>Risk: Evaluate Rate Shock, Stagflation, and Liquidity Squeeze scenarios
+    Risk-->>PM: Interactive Percentile Cone and Stress Matrix Scorecard
     
-    PM->>Export: One-Click "Export Executive Briefing (PDF)"
-    Export-->>Export: Render 2-page institutional layout with in-memory vector charts
+    PM->>Export: Trigger 'Export Executive Briefing (PDF)'
+    Export-->>Export: Render 2-page institutional layout with vector charts
     Export-->>PM: Download QuantMacro_Executive_Tearsheet.pdf
 ```
 
