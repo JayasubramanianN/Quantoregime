@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  quantmacro-platform:
+    build: .
+    container_name: quantmacro_ai_app
+    ports:
+      - "8501:8501"  # Streamlit UI
+      - "8000:8000"  # FastAPI REST Backend
+    environment:
+      - ENVIRONMENT=production
+      - RANDOM_SEED=42
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
